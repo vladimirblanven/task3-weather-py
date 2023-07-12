@@ -1,0 +1,19 @@
+---
+- name: Set-up docker container
+  hosts: slave_deb
+  become: true
+  tasks:
+    - name: Create a data container
+      docker_container:
+        name: weather-py
+        state: present
+        image: vladimirblanven/weather:latest
+
+    - name: Run containter with -e
+      docker_container:
+        name: weather-py
+        state: started
+         env:
+          OPENWEATHER_API_KEY: "4aeacadb38efbe5045b0f512f5110838"
+          CITY_NAME: "Sevastopol"
+
