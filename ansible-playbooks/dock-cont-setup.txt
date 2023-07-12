@@ -1,0 +1,30 @@
+---
+- name: Set-up docker container
+  hosts: slave_deb
+  become: true
+  tasks:
+    - name: Create a data container
+      docker_container:
+        name: simple-nginx
+        state: present
+        image: vladimirblanven/content-nginx
+      
+    - name: Run with a port-forward
+      docker_container:
+        name: simple-nginx
+        state: started
+        ports:
+         - "8080:80"
+         - "127.0.0.1:8080:80/tcp"
+      
+    - name: Check a data container
+      docker_container:
+        name: simple-nginx
+        state: started
+        healthcheck:
+          test: ["CMD", "curl", "--fail", "http://localhost:8080"]
+          interval: 1m30s
+          timeout: 10s
+          retries: 3
+          start_period: 30s
+
