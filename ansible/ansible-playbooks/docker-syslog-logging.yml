@@ -1,0 +1,35 @@
+---
+- name: Enable container logging to Docker host's syslog file
+  hosts: slave_deb
+  become: true
+
+  vars:
+    NSTRING: "\"log-driver\": \"syslog\""
+
+  tasks:
+    - name: Register daemon.json status
+      stat:
+        path: /etc/docker/daemon.json
+      register: file_status
+
+    - name: Check if log-driver is not syslog
+      shell: grep {{ NSTRING }}  daemon.json | wc -l
+      register: grep_string
+      when: file_status.stat.exists
+
+    - name: Edit daemon.json, if only it exists and log-driver is not a syslog
+      lineinfile:
+        path: /etc/docker/daemon.json
+        regexp: '^(\s*"log-driver":\s+).*'
+        line: '  "log-driver": "syslog"'
+      when: file_status.stat.exists and grep_string.stdout|int == 0
+
+    - name: Add a line to a daemon.json if the file does not exist
+      copy:
+        dest: /etc/docker/daemon.json
+        content: |
+          {
+            "log-driver": "syslog"
+          }
+        mode: 0644
+      when: not file_status.stat.exists
