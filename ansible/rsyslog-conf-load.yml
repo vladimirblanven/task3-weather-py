@@ -1,0 +1,7 @@
+---
+- name: Upload new rsyslog configuration file
+  hosts: slave_deb
+  become: yes
+
+  roles:
+    - rsyslog_configuration

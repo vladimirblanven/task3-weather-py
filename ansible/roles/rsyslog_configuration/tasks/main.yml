@@ -1,0 +1,6 @@
+---
+- name: Copy rsyslog configuraion file
+  template:
+    src=rsyslog.conf
+    dest={{  dest_folder  }}
+    mode=0644
